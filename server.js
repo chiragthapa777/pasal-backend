@@ -5,7 +5,7 @@ const fileUpload = require("express-fileupload");
 const { router } = require("./app/routes/routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
-const { options } = require("./swaggerOptions");
+const {  swaggerDocs, swaggerOptions } = require("./swaggerOptions");
 
 //configs
 require("dotenv").config();
@@ -17,8 +17,11 @@ app.use(
   })
 );
 
-const specs = swaggerJsdoc(options);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, swaggerOptions));
+app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerDocs)
+});
 //varibles
 const port = process.env.PORT;
 
