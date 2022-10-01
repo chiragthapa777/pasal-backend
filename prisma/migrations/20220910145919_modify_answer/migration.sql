@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Answer" ALTER COLUMN "answers" DROP DEFAULT,
+ALTER COLUMN "answers" SET DATA TYPE TEXT;

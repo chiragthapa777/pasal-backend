@@ -3,6 +3,7 @@ function router(app){
     app.use("/users",require("./modules/user/userController"))
     app.use("/product",require("./modules/product/productController"))
     app.use("/vendor",require("./modules/vendor/vendorContoller"))
+    app.use("/cart",require("./modules/cart/cartContoller"))
 
 }
 
