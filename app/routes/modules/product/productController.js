@@ -86,13 +86,6 @@ router.get("/", authorize([]),async (req, res) => {
  *         required: true
  *         description: The product id
  *         product: 1
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         required: true
- *         product: asdjgioasdb
- *         description: The book id `sadfgasdg` or `asdgsadgas`
  *     responses:
  *       200:
  *         description: The book description by id

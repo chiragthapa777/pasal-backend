@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const response=require("../../../utils/responseInterceptor")
-const service=require("./Service")
+const service=require("./reviewService")
 const authorize = require("../../../middlewares/authorize");
 
-//exchange ModelName with model name
-//exchange routeName with base route name
+//exchange Review with model name
+//exchange review with base route name
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     ModelName:
+ *     Review:
  *       type: object
  *       required:
  *         - title
@@ -35,18 +35,18 @@ const authorize = require("../../../middlewares/authorize");
 /**
  * @swagger
  * tags:
- *   name: ModelName
- *   description: ModelName
+ *   name: Review
+ *   description: Review
  */
 
 /**
  * @swagger
- * /routeName/:
+ * /review/:
  *   get:
- *     summary: get ModelName
+ *     summary: get Review
  *     security:
  *       - ApiKeyAuth: []
- *     tags: [ModelName]
+ *     tags: [Review]
  *     responses:
  *       200:
  *         content:
@@ -54,7 +54,7 @@ const authorize = require("../../../middlewares/authorize");
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/ModelName'
+ *                 $ref: '#/components/schemas/Review'
  */
 router.get("/",authorize([]), async (req, res) => {
   try {
@@ -67,12 +67,12 @@ router.get("/",authorize([]), async (req, res) => {
 
 /**
  * @swagger
- * /routeName/{id}:
+ * /review/{id}:
  *   get:
- *     summary: Get the ModelName by id
+ *     summary: Get the Review by id
  *     security:
  *       - ApiKeyAuth: []
- *     tags: [ModelName]
+ *     tags: [Review]
  *     parameters:
  *       - in: path
  *         name: id
@@ -80,26 +80,22 @@ router.get("/",authorize([]), async (req, res) => {
  *           type: number
  *         required: true
  *         description: The example id
- *         example: 1
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         required: true
- *         example: asdjgioasdb
- *         description: The book id `sadfgasdg` or `asdgsadgas`
  *     responses:
  *       200:
  *         description: The book description by id
  *         contens:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ModelName'
+ *               $ref: '#/components/schemas/Review'
  *       404:
  *         description: The book was not found
  */
 router.get("/:id",authorize([]), async (req, res) => {
   try {
+    const {id}=req.params
+    if(!id || isNaN(id)){
+          throw "Invalid id provided"
+    }
     const data =await service.findById(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
@@ -109,12 +105,12 @@ router.get("/:id",authorize([]), async (req, res) => {
 
 /**
  * @swagger
- * /routeName/:
+ * /review/:
  *   post:
- *     summary: Create ModelName
+ *     summary: Create Review
  *     security:
  *       - ApiKeyAuth: []
- *     tags: [ModelName]
+ *     tags: [Review]
  *     requestBody:
  *       required: true
  *       content:
@@ -122,34 +118,36 @@ router.get("/:id",authorize([]), async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               feedback:
  *                 type: string
- *                 example: chirag
- *               age:
+ *                 example: i like the product
+ *               productId:
  *                 type: number
  *                 example: 1
- *               active:
- *                 type: boolean
- *                 example: true
- *               orders:
- *                 type: array
- *                 items: 
- *                   type: object
- *                   properties:
- *                     orderName:
- *                       type: string
- *                       example : aoshdgoiash
+ *               userId:
+ *                 type: number
+ *                 example: 7
+ *               rating:
+ *                 type: number
+ *                 example: 1
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ModelName'
+ *               $ref: '#/components/schemas/Review'
  *       500:
  *         description: Some server error
  */
 router.post("/",authorize([]), async (req, res) => {
 try {
+  const {feedback, productId, userId, rating}=req.body
+  if(!feedback || !productId || !userId || !rating || isNaN(productId) || isNaN(userId) || isNaN(rating) ){
+    throw "invalid request"
+  }
+  if(rating>5 || rating<0){
+    throw "Rating must be between 0 to 5"
+  }
   const data =await service.create(req,res)
   response.successResponse(res,data,200)
 } catch (error) {
@@ -159,12 +157,12 @@ try {
 
 /**
  * @swagger
- * /routeName/{id}:
+ * /review/{id}:
  *   put:
- *     summary: Edit ModelName
+ *     summary: Edit Review
  *     security:
  *       - ApiKeyAuth: []
- *     tags: [ModelName]
+ *     tags: [Review]
  *     parameters:
  *       - in: path
  *         name: id
@@ -179,34 +177,32 @@ try {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               feedback:
  *                 type: string
- *                 example: chirag
- *               age:
+ *                 example: new feedback
+ *               rating:
  *                 type: number
- *                 example: 1
- *               active:
- *                 type: boolean
- *                 example: true
- *               orders:
- *                 type: array
- *                 items: 
- *                   type: object
- *                   properties:
- *                     orderName:
- *                       type: string
- *                       example : aoshdgoiash
+ *                 example: 2
+
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ModelName'
+ *               $ref: '#/components/schemas/Review'
  *       500:
  *         description: Some server error
  */
 router.put("/:id",authorize([]), async (req, res) => {
   try {
+    const {feedback, rating}=req.body
+    if(rating && (rating>5 || rating<0)){
+      throw "Rating must be between 0 to 5"
+    }
+    const {id}=req.params
+    if(!id || isNaN(id)){
+          throw "Invalid id provided"
+    }
     const data =await service.update(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
@@ -216,12 +212,12 @@ router.put("/:id",authorize([]), async (req, res) => {
 
 /**
  * @swagger
- * /routeName/{id}:
+ * /review/{id}:
  *   delete:
- *     summary: Delete ModelName
+ *     summary: Delete Review
  *     security:
  *       - ApiKeyAuth: []
- *     tags: [ModelName]
+ *     tags: [Review]
  *     parameters:
  *       - in: path
  *         name: id
@@ -234,10 +230,14 @@ router.put("/:id",authorize([]), async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ModelName'
+ *               $ref: '#/components/schemas/Review'
  */
 router.delete("/:id",authorize([]), async (req, res) => {
   try {
+    const {id}=req.params
+    if(!id || isNaN(id)){
+          throw "Invalid id provided"
+    }
     const data =await service.delete(req,res)
     response.successResponse(res,data,200)
   } catch (error) {

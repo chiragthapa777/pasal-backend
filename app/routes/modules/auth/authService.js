@@ -1,5 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+// const {prisma}=require("../../../middlewares/excludePassword")
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -51,6 +53,10 @@ module.exports = {
         where: {
           email,
         },
+        select:{
+          email:true,
+          password:true
+        }
       });
       if (!user) {
         throw "Email or password is not correct";

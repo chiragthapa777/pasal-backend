@@ -1,33 +1,14 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+// const {prisma}=require("../../../middlewares/excludePassword")
+const {productIncludeObject: includeObj} = require("../../../utils/modelInclude")
 
-const includeObj={
-    productTags:{
-        include:{
-            tag:true
-        }
-    },
-    vendor:true,
-    questions:{
-        include:{
-            answers:{
-                include:{
-                    user:true
-                }
-            }
-        }
-    },
-    images:true,
-    reviews:{
-        include:{
-            user:true
-        }
-    },
-    _count:{
-        select:{
-            reviews:true,
-            questions:true
-        }
+const roundOffFunction=(avg)=>{
+    const difference=avg-Math.floor(avg)
+    if(difference > 0.5){
+        return Math.floor(avg)+0.5
+    }else{
+        return Math.floor(avg)+1
     }
 }
 
@@ -52,24 +33,44 @@ module.exports={
         try {
             let whereObj={}
             let orderByObj={}
-            return prisma.product.findMany({
+            const products = await prisma.product.findMany({
                 where:whereObj,
                 include:includeObj,
                 orderBy:orderByObj
             })
+            for(let p in products){
+                let averageRating = 0
+                let total = 0
+                const length = products[p]?.reviews?.length ? products[p].reviews.length!==0 ? products[p].reviews.length : 1 : 1
+                for(let review of products[p]?.reviews){
+                    total += review.rating
+                }
+                averageRating = total/length
+                products[p]={...products[p],averageRating:roundOffFunction(averageRating)}
+            }
+            return products
         } catch (error) {
             throw error
         }
     },
     async findById(req){
         try {
+            let averageRating = 0
+
             let whereObj={
                 id:Number(req.params.id)
             }
-            return prisma.product.findUnique({
+            const product =await  prisma.product.findUnique({
                 where:whereObj,
                 include:includeObj
             })
+            let total = 0
+            const length = product?.reviews?.length ? product.reviews.length!==0 ? product.reviews.length : 1 : 1
+            for(let review of product?.reviews){
+                    total += review.rating
+            }
+            averageRating = total/length
+            return {...product,averageRating:roundOffFunction(averageRating)}
         } catch (error) {
             throw error
         }
@@ -100,7 +101,23 @@ module.exports={
     },
     async delete(req){
         try {
-            return "delete"
+            let product=await prisma.product.findUnique({
+                where:{
+                    id:Number(req.params.id)
+                }
+            })
+            if(!product){
+                throw "Cannot find the product"
+            }
+            return await prisma.product.update({
+                where:{
+                    id:Number(req.params.id)
+                },
+                data:{
+                    active:false
+                },
+                include:includeObj
+            })
         } catch (error) {
             throw error
         }

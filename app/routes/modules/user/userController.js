@@ -83,6 +83,32 @@ router.get("/",authorize([]), async (req, res) => {
     response.errorResponse(res, error, 400);
   }
 });
+/**
+ * @swagger
+ * /users/loggedin:
+ *   get:
+ *     security:
+ *       - ApiKeyAuth: []
+ *     summary: Get loggedin user
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: The book description by id
+ *         contens:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: The book was not found
+ */
+ router.get("/loggedin",authorize([]), async (req, res) => {
+  try {
+    response.successResponse(res, req.user, 200);
+  } catch (error) {
+    response.errorResponse(res, error, 400);
+  }
+});
+
 
 /**
  * @swagger
@@ -110,7 +136,7 @@ router.get("/",authorize([]), async (req, res) => {
  *       404:
  *         description: The book was not found
  */
-router.get("/:id",authorize([]), async (req, res) => {
+ router.get("/:id",authorize([]), async (req, res) => {
   try {
     const {id}=req.params
     if(!id){
@@ -122,6 +148,8 @@ router.get("/:id",authorize([]), async (req, res) => {
     response.errorResponse(res, error, 400);
   }
 });
+
+
 
 /**
  * @swagger

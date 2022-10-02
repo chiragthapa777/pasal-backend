@@ -6,6 +6,8 @@ const { router } = require("./app/routes/routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const {  swaggerDocs, swaggerOptions } = require("./swaggerOptions");
+const { PrismaClient } = require("@prisma/client");
+const {prismaMiddleware}= require("./app/middlewares/excludePassword")
 
 //configs
 require("dotenv").config();
@@ -17,11 +19,17 @@ app.use(
   })
 );
 
+
+//swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, swaggerOptions));
 app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerDocs)
 });
+
+//prisma 
+app.use(prismaMiddleware);
+
 //varibles
 const port = process.env.PORT;
 

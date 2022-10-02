@@ -13,7 +13,7 @@ const includeObj={
 }
 
 module.exports={
-    async getUsers(req,res){
+    async getUsers(req){
         try {
             let whereObj={}
             let users=await prisma.user.findMany({
@@ -29,7 +29,7 @@ module.exports={
             throw error
         }
     },
-    async getUserById(req,res){
+    async getUserById(req){
         try {
             const {id}=req.params
             let whereObj={
@@ -39,13 +39,13 @@ module.exports={
                 where:whereObj,
                 include:includeObj
             })
-            delete user.password
+            delete user?.password
             return user
         } catch (error) {
             throw error
         }
     },
-    async editUser(req,res){
+    async editUser(req){
         try {
             const { id }=req.params
             const { password, name, email, vendorId, number } = req.body;

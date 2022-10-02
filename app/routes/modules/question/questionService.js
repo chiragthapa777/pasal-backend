@@ -1,14 +1,26 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const {questionReviewObject : includeObj} = require("../../../utils/modelInclude")
 
-// replace modelName
-const includeObj={}
+// replace question
 
 module.exports={
     async create(req,res){
         try {
             let data=req.body
-            const result = await prisma.modelName.create({
+            const product=await prisma.product.findUnique({
+                where:{
+                    id:Number(data.productId)
+                }
+            })
+            if(!product){
+                throw "Cannot find the product"
+            }
+            data={
+                userId:req.user.id,
+                ...data
+            }
+            const result = await prisma.question.create({
                 data,
                 include:includeObj
             })
@@ -19,8 +31,12 @@ module.exports={
     },
     async find(req,res){
         try {
+            const {productId}=req.query
             let whereObj={}
-            const result = await prisma.modelName.findMany({
+            if(productId || !isNaN(productId)){
+                whereObj.productId=Number(productId)
+            }
+            const result = await prisma.question.findMany({
                 where:whereObj,
                 include:includeObj
             })
@@ -32,13 +48,13 @@ module.exports={
     async findById(req,res){
         try {
             const {id}=req.params
-            const modelName= await prisma.modelName.findUnique({
+            const question= await prisma.question.findUnique({
                 where:{
                     id:Number(id)
                 },
                 include:includeObj
             })
-            return modelName
+            return question
         } catch (error) {
             throw error
         }
@@ -48,16 +64,16 @@ module.exports={
         try {
             const {id}=req.params
             const data=req.body
-            const modelName= await prisma.modelName.findUnique({
+            const question= await prisma.question.findUnique({
                 where:{
                     id:Number(id)
                 },
                 include:includeObj
             })
-            if(!modelName){
-                throw "Cannot find modelName"
+            if(!question){
+                throw "Cannot find question"
             }
-            const result=await prisma.modelName.findUnique({
+            const result=await prisma.question.findUnique({
                 where:{
                     id:Number(id)
                 },
@@ -73,16 +89,16 @@ module.exports={
         try {
             const {id}=req.params
             const data=req.body
-            const modelName= await prisma.modelName.findUnique({
+            const question= await prisma.question.findUnique({
                 where:{
                     id:Number(id)
                 },
                 include:includeObj
             })
-            if(!modelName){
-                throw "Cannot find modelName"
+            if(!question){
+                throw "Cannot find question"
             }
-            const result=await prisma.modelName.delete({
+            const result=await prisma.question.delete({
                 where:{
                     id:Number(id)
                 },
