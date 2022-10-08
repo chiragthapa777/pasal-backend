@@ -70,6 +70,9 @@ router.get("/", authorize([]),async (req, res) => {
   }
 });
 
+
+
+
 /**
  * @swagger
  * /product/{id}:
@@ -217,6 +220,38 @@ router.put("/:id",authorize([]), async (req, res) => {
 
 /**
  * @swagger
+ * /product/image/{id}:
+ *   delete:
+ *     deprecated: false
+ *     summary: Delete Product
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Product]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: The product id
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ */
+router.delete("/image/:id",authorize([]), async (req, res) => {
+  try {
+    const data =await service.deleteImage(req)
+    response.successResponse(res,data,200)
+  } catch (error) {
+    response.errorResponse(res, error, 400)
+  }
+});
+
+/**
+ * @swagger
  * /product/{id}:
  *   delete:
  *     deprecated: true
@@ -246,6 +281,54 @@ router.delete("/:id",authorize([]), async (req, res) => {
     response.errorResponse(res, error, 400)
   }
 });
+
+
+/**
+ * @swagger
+ * /product/addImage:
+ *   post:
+ *     summary: Edit Product
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Product]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: number
+ *                 example: 1
+ *               url:
+ *                 type: string
+ *                 example: dasgas
+ *               public_url:
+ *                 type: string
+ *                 example: sadgsd
+ *               desc:
+ *                 type: string
+ *                 example: this is desc for image
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Some server error
+ */
+ router.post("/addImage",authorize([]), async (req, res) => {
+  try {
+    const data =await service.addImage(req)
+    response.successResponse(res,data,200)
+  } catch (error) {
+    console.log(error)
+    response.errorResponse(res, error, 400)
+  }
+});
+
 
 
 

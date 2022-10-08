@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 // const {prisma}=require("../../../middlewares/excludePassword")
 const {productIncludeObject: includeObj} = require("../../../utils/modelInclude")
+const {deleteImage}=require("../uploads/uploadService")
 
 const roundOffFunction=(avg)=>{
     const difference=avg-Math.floor(avg)
@@ -121,5 +122,52 @@ module.exports={
         } catch (error) {
             throw error
         }
-    }
+    },
+    async addImage(req){
+        try {
+            const {productId, url, public_url, desc}=req.body
+            let product=await prisma.product.findUnique({
+                where:{
+                    id:Number(productId)
+                }
+            })
+            if(!product){
+                throw "cannot find product"
+            }
+            const productImage=await prisma.productImage.create({
+                data:{
+                    productId:Number(productId),
+                    url,
+                    public_url,
+                    desc
+                }
+            })
+            return productImage
+        } catch (error) {
+            throw error
+        }
+    },
+    async deleteImage(req){
+        try {
+            const {id}=req.params
+            let product=await prisma.productImage.findUnique({
+                where:{
+                    id:Number(id)
+                }
+            })
+            if(!product){
+                throw "cannot find productImage"
+            }
+            const {public_url}=product
+            await deleteImage({body:{public_id:public_url}},{})
+            const productImage=await prisma.productImage.delete({
+                where:{
+                    id:Number(id)
+                }
+            })
+            return productImage
+        } catch (error) {
+            throw error
+        }
+    },
 }

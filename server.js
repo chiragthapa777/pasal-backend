@@ -27,6 +27,11 @@ app.get('/api-docs.json', (req, res) => {
     res.send(swaggerDocs)
 });
 
+// //this is middleware for receving file from client
+// app.use(fileUpload({
+//   useTempFiles:true
+// }))
+
 //prisma 
 app.use(prismaMiddleware);
 

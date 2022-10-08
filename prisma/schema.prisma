@@ -241,6 +241,6 @@ model CartDetails {
 
 // discount code
 
-// order order details
+// order items
 
 // invoice invoice details
