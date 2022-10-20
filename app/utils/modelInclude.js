@@ -38,6 +38,11 @@ const productIncludeObject={
         include:questionReviewObject
     },
     images:true,
+    discounts:{
+        where:{
+            isValid:true
+        }
+    },
     reviews:reviewIncludeObject,
     _count:{
         select:{
