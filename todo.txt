@@ -3,3 +3,5 @@ payment module
 shipping crud
 discount crud
 other charges curd
+
+//make vendor active by admin - done

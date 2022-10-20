@@ -27,14 +27,30 @@ module.exports={
                     ]
                 }
             })
-            if(vendor){
+            console.log(vendor)
+            if(vendor.length>0){
                 throw "Email or pan already exists"
             }
-            let data={...req.body}
-            return await prisma.vendor.create({
-                data
+            let data={
+                ...req.body   
+            }
+            return await prisma.$transaction(async (t)=>{
+                console.log("dasgasd")
+                const vendor=await t.vendor.create({
+                    data
+                })
+                await t.user.update({
+                    where:{
+                        id:Number(req.user.id)
+                    },
+                    data:{
+                        vendorId:vendor.id
+                    }
+                })
+                return vendor
             })
         } catch (error) {
+            console.log(error)
             throw error
         }
     },
@@ -76,6 +92,40 @@ module.exports={
     async delete(req,res){
         try {
             return "delete"
+        } catch (error) {
+            throw error
+        }
+    },
+    async acceptVendorRequest(req,res){
+        try {
+            const {vendorId}=req.params
+            return await prisma.$transaction(async (t)=>{
+                const vendor =await t.vendor.update({
+                    where:{
+                        id:Number(vendorId)
+                    },
+                    data:{
+                        requestAccepted:true
+                    },
+                    include:{
+                        users:true
+                    }
+                })
+                for(const u of vendor.users){
+                    if(u.role!=="ADMIN"){
+                        await t.user.update({
+                            where:{
+                                id:Number(u.id)
+                            },
+                            data:{
+                                role:"SELLER"
+                            }
+                        })
+                    }
+                }
+                delete vendor.users
+                return vendor
+            })
         } catch (error) {
             throw error
         }

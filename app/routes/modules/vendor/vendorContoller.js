@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const response=require("../../../utils/responseInterceptor")
-const service=require(".//vendorService")
+const response = require("../../../utils/responseInterceptor");
+const service = require(".//vendorService");
 const authorize = require("../../../middlewares/authorize");
 
 //exchange Example with model name
@@ -56,13 +56,13 @@ const authorize = require("../../../middlewares/authorize");
  *               items:
  *                 $ref: '#/components/schemas/Vendor'
  */
-router.get("/",authorize([]), async (req, res) => {
-  try {
-    const data =await service.find(req,res)
-    response.successResponse(res,data,200)
-  } catch (error) {
-    response.errorResponse(res, error, 400)
-  }
+router.get("/", authorize([]), async (req, res) => {
+	try {
+		const data = await service.find(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		response.errorResponse(res, error, 400);
+	}
 });
 
 /**
@@ -98,13 +98,13 @@ router.get("/",authorize([]), async (req, res) => {
  *       404:
  *         description: The book was not found
  */
-router.get("/:id",authorize([]), async (req, res) => {
-  try {
-    const data =await service.findById(req,res)
-    response.successResponse(res,data,200)
-  } catch (error) {
-    response.errorResponse(res, error, 400)
-  }
+router.get("/:id", authorize([]), async (req, res) => {
+	try {
+		const data = await service.findById(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		response.errorResponse(res, error, 400);
+	}
 });
 
 /**
@@ -146,13 +146,14 @@ router.get("/:id",authorize([]), async (req, res) => {
  *       500:
  *         description: Some server error
  */
-router.post("/",authorize([]), async (req, res) => {
-try {
-  const data =await service.create(req)
-  response.successResponse(res,data,200)
-} catch (error) {
-  response.errorResponse(res, error, 400)
-}
+router.post("/", authorize([]), async (req, res) => {
+	try {
+		const data = await service.create(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		console.log(error);
+		response.errorResponse(res, error, 400);
+	}
 });
 
 /**
@@ -201,13 +202,46 @@ try {
  *       500:
  *         description: Some server error
  */
-router.put("/:id",authorize([]), async (req, res) => {
-  try {
-    const data =await service.update(req,res)
-    response.successResponse(res,data,200)
-  } catch (error) {
-    response.errorResponse(res, error, 400)
-  }
+router.put("/:id", authorize([]), async (req, res) => {
+	try {
+		const data = await service.update(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		response.errorResponse(res, error, 400);
+	}
+});
+
+/**
+ * @swagger
+ * /vendor/{vendorId}/acceptRequest:
+ *   put:
+ *     summary: accept vendor request by admin
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Vendor]
+ *     parameters:
+ *       - in: path
+ *         name: vendorId
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: The example id
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Vendor'
+ *       500:
+ *         description: Some server error
+ */
+router.put("/:vendorId/acceptRequest", authorize(["ADMIN"]), async (req, res) => {
+	try {
+		const data = await service.acceptVendorRequest(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		response.errorResponse(res, error, 400);
+	}
 });
 
 /**
@@ -215,7 +249,7 @@ router.put("/:id",authorize([]), async (req, res) => {
  * /vendor/{id}:
  *   delete:
  *     deprecated: true
- *     summary: Delete 
+ *     summary: Delete
  *     security:
  *       - ApiKeyAuth: []
  *     tags: [Vendor]
@@ -233,15 +267,13 @@ router.put("/:id",authorize([]), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Vendor'
  */
-router.delete("/:id",authorize([]), async (req, res) => {
-  try {
-    const data =await service.delete(req,res)
-    response.successResponse(res,data,200)
-  } catch (error) {
-    response.errorResponse(res, error, 400)
-  }
+router.delete("/:id", authorize([]), async (req, res) => {
+	try {
+		const data = await service.delete(req, res);
+		response.successResponse(res, data, 200);
+	} catch (error) {
+		response.errorResponse(res, error, 400);
+	}
 });
-
-
 
 module.exports = router;

@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -14,7 +15,30 @@ enum Role {
   USER
   ADMIN
   SELLER
+  VENDOR_ADMIN
 }
+enum OrderStatusEnum {
+  PLACED
+  PROCESSING
+  WAREHOUSED
+  DELIVERING
+  COMPLETED
+}
+enum OrderItemStatusEnum {
+  PLACED
+  PROCESSING
+  WAREHOUSED
+  DELIVERING
+  COMPLETED
+}
+enum PaymentMode{
+  CASH
+  ESEWA
+  KHALTI
+  FONEPAY
+  CHEQUE
+}
+
 
 model User {
   id          Int          @id @default(autoincrement())
@@ -26,8 +50,12 @@ model User {
   role        Role         @default(USER)
   number      String?
   vendorId    Int?
+  vendorAdmin Boolean     @default(false)
   cart        Cart?
   cartDetails CartDetails[]
+  order       Order[]
+  orderItems  OrderItems[]
+  payments    Payment[]
 
   //relation
   shipping      Shipping?
@@ -65,6 +93,8 @@ model Product {
   reviews      Review[]
   cartDetails  CartDetails[]
   images ProductImage[]
+  orderItems OrderItems[]
+  discounts Discount[]
 }
 
 model ProductImage{
@@ -100,6 +130,7 @@ model Vendor {
   pan       String? @unique
   desc      String?
   active    Boolean  @default(true)
+  requestAccepted    Boolean  @default(false)
 
   //relation
   users         User[]
@@ -236,6 +267,84 @@ model CartDetails {
   active    Boolean @default(true)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+
+
+model OtherCharge {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  desc String?
+  price Float
+  orderItems OrderItems[]
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status OrderStatusEnum @default(PLACED)
+  isBillPrinted Boolean @default(false)
+  isPaid Boolean @default(false)
+  userId Int
+  total Float
+  discount Float
+  totalAfterDiscount Float
+  vat Float
+  totalWithVat Float
+  otherCharge Float
+  grandTotal Float
+  orderItems OrderItems[]
+  payments Payment[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OrderItems {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status OrderItemStatusEnum @default(PLACED)
+  orderId Int
+  productId Int? 
+  otherChargeId Int?
+  userId Int
+  total Float
+  discount Float
+  totalAfterDiscount Float
+  vat Float
+  totalWithVat Float
+  grandTotal Float
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  othercharges OtherCharge?  @relation(fields: [otherChargeId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount Float
+  remark Float
+  mode PaymentMode
+  addedBy Int
+  orderId Int
+  user      User     @relation(fields: [addedBy], references: [id], onDelete: Cascade)
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Discount{
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId Int
+  percent Int
+  validityFrom DateTime @default(now())
+  validityTo DateTime?
+  isValid Boolean @default(true)
   product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 

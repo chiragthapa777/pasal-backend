@@ -108,5 +108,30 @@ module.exports={
         } catch (error) {
             throw error
         }
+    },
+    async addAnswerToQsn(req,res){
+        try {
+            const {questionId}=req.params
+            const {answer}=req.body
+            const question= await prisma.question.findUnique({
+                where:{
+                    id:Number(questionId)
+                },
+                include:includeObj
+            })
+            if(!question){
+                throw "Cannot find question"
+            }
+            const data = await prisma.answer.create({
+                data:{
+                    questionId:Number(questionId),
+                    answers:answer,
+                    userId:req.user.id
+                }
+            })
+            return data
+        } catch (error) {
+            throw error
+        }
     }
 }

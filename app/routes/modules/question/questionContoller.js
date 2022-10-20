@@ -220,6 +220,52 @@ router.delete("/:id",authorize([]), async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /question/{questionId}/answer:
+ *   post:
+ *     summary: Delete Question
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Question]
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: The example id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               answer:
+ *                 type: string
+ *                 example: this is answer to the question
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Question'
+ */
+router.post("/:questionId/answer",authorize([]), async (req, res) => {
+  try {
+    const {questionId}=req.params
+    const {answer}=req.body
+    if(!questionId || isNaN(questionId) || !answer){
+      throw "Invalid request"
+    }
+    const data =await service.addAnswerToQsn(req,res)
+    response.successResponse(res,data,200)
+  } catch (error) {
+    response.errorResponse(res, error, 400)
+  }
+});
+
 
 
 

@@ -60,6 +60,7 @@ const service = require("./authService");
       throw "Complete information is not provided";
     }
     const data = await service.login(req);
+
     response.successResponse(res, data, 200);
   } catch (error) {
     response.errorResponse(res, error, 400);

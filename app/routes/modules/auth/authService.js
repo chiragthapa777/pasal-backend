@@ -25,7 +25,7 @@ module.exports = {
         name,
         email,
         password: hashPassword,
-        number: number ? Number(number) : null,
+        number: number ? number : null,
         vendorId: vendorId ? Number(vendorId) : null,
         role: slug ? "ADMIN" : "USER"
 
@@ -53,10 +53,6 @@ module.exports = {
         where: {
           email,
         },
-        select:{
-          email:true,
-          password:true
-        }
       });
       if (!user) {
         throw "Email or password is not correct";
@@ -65,15 +61,15 @@ module.exports = {
       if (!isValid) {
         throw "Email or password is not correct";
       }
-      const token = jwt.sign(
-        {
-          id: user.id,
-          role: user.role,
-          vendorId: user.vendorId,
-          name: user.name,
-        },
-        process.env.SECRET_KEY
-      );
+      console.log(user)
+      const payload = {
+        id: user.id,
+        role: user.role,
+        vendorId: user.vendorId,
+        name: user.name,
+      }
+      const token = jwt.sign(payload,process.env.SECRET_KEY);
+      console.log(token)
       delete user.password;
       return { token, ...user };
     } catch (error) {
