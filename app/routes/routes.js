@@ -8,6 +8,7 @@ function router(app){
     app.use("/question",require("./modules/question/questionContoller"))
     app.use("/upload",require("./modules/uploads/uploadController"))
     app.use("/order",require("./modules/order/orderContoller"))
+    app.use("/shipping",require("./modules/shipping/shippingContoller"))
 
 }
 
