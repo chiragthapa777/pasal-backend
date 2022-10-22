@@ -1,5 +1,5 @@
 order tracking, order item tracking and billing - completed
-payment module
+payment module - completed
 shipping crud - completed
 discount crud
 other charges curd

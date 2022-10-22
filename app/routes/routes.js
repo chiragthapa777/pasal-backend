@@ -9,6 +9,7 @@ function router(app){
     app.use("/upload",require("./modules/uploads/uploadController"))
     app.use("/order",require("./modules/order/orderContoller"))
     app.use("/shipping",require("./modules/shipping/shippingContoller"))
+    app.use("/payment",require("./modules/payment/paymentContoller"))
 
 }
 

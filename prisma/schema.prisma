@@ -37,6 +37,7 @@ enum PaymentMode{
   KHALTI
   FONEPAY
   CHEQUE
+  CARD
 }
 
 
@@ -333,7 +334,7 @@ model Payment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   amount Float
-  remark Float
+  remark String?
   mode PaymentMode
   addedBy Int
   orderId Int

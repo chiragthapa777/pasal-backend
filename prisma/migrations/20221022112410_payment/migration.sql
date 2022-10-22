@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Payment" ALTER COLUMN "remark" DROP NOT NULL,
+ALTER COLUMN "remark" SET DATA TYPE TEXT;
