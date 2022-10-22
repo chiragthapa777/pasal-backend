@@ -1,0 +1,2 @@
+export const OrderStatusEnum =["PLACED","PROCESSING","WAREHOUSED","DELIVERING","COMPLETED"]
+export const OrderItemStatusEnum =["PLACED","PROCESSING","WAREHOUSED","DELIVERING","COMPLETED"]

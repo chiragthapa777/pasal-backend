@@ -307,9 +307,13 @@ model OrderItems {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status OrderItemStatusEnum @default(PLACED)
+  quantity Int
+  rate Float
   orderId Int
   productId Int? 
   otherChargeId Int?
+  discountPercent Int?
+  vatPercent Int?
   userId Int
   total Float
   discount Float

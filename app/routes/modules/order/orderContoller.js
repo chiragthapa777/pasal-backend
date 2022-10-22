@@ -66,7 +66,7 @@ const authorize = require("../../../middlewares/authorize");
   
 /**
  * @swagger
- * /order/:
+ * /order/byCart:
  *   post:
  *     summary: Create Order by cart
  *     security:
@@ -82,6 +82,9 @@ const authorize = require("../../../middlewares/authorize");
  *               userId:
  *                 type: number
  *                 example: 1
+ *               clearCart:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
  *         content:
@@ -91,9 +94,9 @@ const authorize = require("../../../middlewares/authorize");
  *       500:
  *         description: Some server error
  */
- router.post("/",authorize([]), async (req, res) => {
+ router.post("/byCart",authorize([]), async (req, res) => {
   try {
-    const data =await service.create(req,res)
+    const data =await service.createByCart(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
     response.errorResponse(res, error, 400)
@@ -110,12 +113,54 @@ const authorize = require("../../../middlewares/authorize");
  *     tags: [Order]
  *     parameters:
  *       - in: query
- *         name: name
+ *         name: userId
+ *         schema:
+ *           type: number
+ *         required: false
+ *         example: 1
+ *         description: order by user id
+ *       - in: query
+ *         name: isPaid
  *         schema:
  *           type: string
- *         required: true
+ *           enum: [true, false]
+ *         required: false
+ *         description: The book id `true` or `false`
+ *       - in: query
+ *         name: fromDate
+ *         schema:
+ *           type: string
+ *         required: false
  *         example: asdjgioasdb
- *         description: The book id `sadfgasdg` or `asdgsadgas`
+ *         description: js date format
+ *       - in: query
+ *         name: toDate
+ *         schema:
+ *           type: string
+ *         required: false
+ *         example: asdjgioasdb
+ *         description: js date format
+ *       - in: query
+ *         name: today
+ *         schema:
+ *           type: string
+ *           enum: [true, false]
+ *         required: false
+ *         description: today's record only
+ *       - in: query
+ *         name: toDate
+ *         schema:
+ *           type: string
+ *         required: false
+ *         example: asdjgioasdb
+ *         description: js date format
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PLACED, PROCESSING, WAREHOUSED, DELIVERING, COMPLETED]
+ *         required: false
+ *         description: status filter
  *     responses:
  *       200:
  *         content:
@@ -127,7 +172,113 @@ const authorize = require("../../../middlewares/authorize");
  */
 router.get("/",authorize([]), async (req, res) => {
   try {
+    const {status, toDate, fromDate, today, userId, isPaid } = req.query
+    console.log(req.query)
     const data =await service.find(req,res)
+    response.successResponse(res,data,200)
+  } catch (error) {
+    response.errorResponse(res, error, 400)
+  }
+});
+
+
+/**
+ * @swagger
+ * /order/items:
+ *   get:
+ *     summary: get Order items
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Order]
+ *     parameters:
+ *       - in: query
+ *         name: vendorId
+ *         schema:
+ *           type: number
+ *         required: false
+ *         example: 1
+ *         description: order by vendor id
+ *       - in: query
+ *         name: fromDate
+ *         schema:
+ *           type: string
+ *         required: false
+ *         example: asdjgioasdb
+ *         description: js date format
+ *       - in: query
+ *         name: toDate
+ *         schema:
+ *           type: string
+ *         required: false
+ *         example: asdjgioasdb
+ *         description: js date format
+ *       - in: query
+ *         name: today
+ *         schema:
+ *           type: string
+ *           enum: [true, false]
+ *         required: false
+ *         description: today's record only
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PLACED, PROCESSING, WAREHOUSED, DELIVERING, COMPLETED]
+ *         required: false
+ *         description: status filter
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ */
+ router.get("/items",authorize([]), async (req, res) => {
+  try {
+    const {status, toDate, fromDate, today, vendorId } = req.query
+    console.log(req.query)
+    const data =await service.findOrderItems(req,res)
+    response.successResponse(res,data,200)
+  } catch (error) {
+    response.errorResponse(res, error, 400)
+  }
+});
+
+/**
+ * @swagger
+ * /order/items/{id}:
+ *   get:
+ *     summary: Get the Order items by id
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags: [Order]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: The example id
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: The book description by id
+ *         contens:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: The book was not found
+ */
+ router.get("/items/:id",authorize([]), async (req, res) => {
+  try {
+    const {id}=req.params
+    if(!id || isNaN(id)){
+      throw "Invalid request"
+    }
+    const data =await service.findOrderItemsById(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
     response.errorResponse(res, error, 400)
@@ -178,7 +329,7 @@ router.get("/:id",authorize([]), async (req, res) => {
  * @swagger
  * /order/{id}:
  *   put:
- *     summary: Edit Order
+ *     summary: update the status of order by admin
  *     security:
  *       - ApiKeyAuth: []
  *     tags: [Order]
@@ -196,23 +347,9 @@ router.get("/:id",authorize([]), async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               status:
  *                 type: string
- *                 example: chirag
- *               age:
- *                 type: number
- *                 example: 1
- *               active:
- *                 type: boolean
- *                 example: true
- *               orders:
- *                 type: array
- *                 items: 
- *                   type: object
- *                   properties:
- *                     orderName:
- *                       type: string
- *                       example : aoshdgoiash
+ *                 example: WAREHOUSED
  *     responses:
  *       200:
  *         content:
@@ -222,9 +359,14 @@ router.get("/:id",authorize([]), async (req, res) => {
  *       500:
  *         description: Some server error
  */
-router.put("/:id",authorize([]), async (req, res) => {
+router.put("/:id",authorize(["ADMIN"]), async (req, res) => {
   try {
     const {id}=req.params
+    const {status}=req.body
+    const OrderStatusEnumForAdmin =["WAREHOUSED","DELIVERING","COMPLETED"]
+    if(!OrderStatusEnumForAdmin.includes(status)){
+      throw "Invalid status provided"
+    }
     if(!id || isNaN(id)){
       throw "Invalid request"
     }
@@ -237,9 +379,9 @@ router.put("/:id",authorize([]), async (req, res) => {
 
 /**
  * @swagger
- * /order/{id}:
- *   delete:
- *     summary: Delete Order
+ * /order/{id}/items:
+ *   put:
+ *     summary: update the status of order items by vendors
  *     security:
  *       - ApiKeyAuth: []
  *     tags: [Order]
@@ -250,29 +392,42 @@ router.put("/:id",authorize([]), async (req, res) => {
  *           type: number
  *         required: true
  *         description: The example id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 example: PROCESSING
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Order'
+ *       500:
+ *         description: Some server error
  */
-router.delete("/:id",authorize([]), async (req, res) => {
+router.put("/:id/items",authorize(["VENDOR"]), async (req, res) => {
   try {
     const {id}=req.params
+    const {status}=req.body
+    const OrderStatusEnumForVendor =["PROCESSING"]
+    if(!OrderStatusEnumForVendor.includes(status)){
+      throw "Invalid status provided"
+    }
     if(!id || isNaN(id)){
       throw "Invalid request"
     }
-    const data =await service.delete(req,res)
+    const data =await service.update(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
     response.errorResponse(res, error, 400)
   }
 });
-
-
-
-
 
 
 module.exports = router;

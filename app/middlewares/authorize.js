@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 function authorize(roles) {
 	return (req, res, next) => {
 		try {
-			console.log("dsagnasigndsaij");
 			const token = req.header("token");
 			if (!token)
 				return res
