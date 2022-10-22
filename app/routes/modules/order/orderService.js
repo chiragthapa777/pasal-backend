@@ -22,7 +22,6 @@ async function orderItemReducer(userId, items) {
 	return items.map((item) => {
 		const total = item.quantity * item.product.price;
 		let discount = 0;
-		console.log("item : ", item.product.discounts);
 		let discountPercent = 0;
 		let vatPercent = 0;
 		if (item.product?.discounts.length > 0) {
@@ -128,6 +127,32 @@ async function addDelivery(items, prisma, userId) {
 	});
 }
 
+const reduceStockOfProduct= async (tx, items)=>{
+	for(const item of items){
+		if(item.productId){
+			const product =await tx.product.findUnique({
+				where:{
+					id:item.productId
+				}
+			})
+			if(!product || !product.active){
+				throw "Cannot find the product"
+			}
+			if(product.quantity < item.quantity){
+				throw "Product's stock is not enough"
+			}
+			await tx.product.update({
+				where:{
+					id:item.productId
+				},
+				data:{
+					quantity:product.quantity-item.quantity
+				}
+			})
+		}
+	}
+}
+
 /**
  *
  * @param {number} userId
@@ -138,26 +163,21 @@ async function generateOrder(userId, items) {
 	try {
 		return await prisma.$transaction(async (tx) => {
 			const orderItemReduced = await orderItemReducer(userId, items);
-			console.log("1itemArray:", orderItemReduced);
-			// add delivery charge
 			await addDelivery(orderItemReduced, prisma, userId);
-			console.log("2 delivery itemArray:", orderItemReduced);
 			const orderData = await orderCalculator(orderItemReduced, userId);
 			const order = await tx.order.create({
 				data: orderData,
 			});
-			console.log("order:", order);
 			for (const i in orderItemReduced) {
 				orderItemReduced[i] = {
 					...orderItemReduced[i],
 					orderId: order.id,
 				};
 			}
-
-			console.log("3 itemArray:", orderItemReduced);
 			const orderItems = await tx.orderItems.createMany({
 				data: orderItemReduced,
 			});
+			await reduceStockOfProduct(tx,orderItemReduced)
 			return tx.order.findUnique({
 				where: {
 					id: order.id,
@@ -189,7 +209,7 @@ module.exports = {
 						},
 					},
 				});
-				if (!product) {
+				if (!product || !product.active) {
 					throw "Cannot find the product";
 				}
 				if (items[i].quantity > product.quantity) {
@@ -216,7 +236,6 @@ module.exports = {
 	async createByCart(req, res) {
 		try {
 			let { userId, clearCart } = req.body;
-			console.log(req.body);
 			//check user
 			const user = await prisma.user.findUnique({
 				where: {
@@ -255,7 +274,7 @@ module.exports = {
 						},
 					},
 				});
-				if (!product) {
+				if (!product || !product.active) {
 					throw "Cannot find the product";
 				}
 				items[i] = {
@@ -280,7 +299,6 @@ module.exports = {
 					},
 				});
 			}
-			console.log("ORDER : ", result);
 			return result;
 		} catch (error) {
 			console.log("Create by cart : ", error);
@@ -314,7 +332,6 @@ module.exports = {
 			if (isPaid === "true" || isPaid === "false") {
 				whereObj.isPaid = isPaid === "true" ? true : false;
 			}
-			console.log(whereObj);
 			const result = await prisma.order.findMany({
 				where: whereObj,
 				include: includeObj,
