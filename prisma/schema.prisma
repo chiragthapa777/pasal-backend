@@ -348,8 +348,6 @@ model Discount{
   updatedAt DateTime @updatedAt
   productId Int
   percent Int
-  validityFrom DateTime @default(now())
-  validityTo DateTime?
   isValid Boolean @default(true)
   product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

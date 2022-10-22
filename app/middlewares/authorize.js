@@ -12,7 +12,6 @@ function authorize(roles) {
 					.json({ success: false, data: "Login first !!!" });
 			const secretKey = process.env.SECRET_KEY;
 			const payload = jwt.verify(token, secretKey);
-      console.log(payload)
 			prisma.user
 				.findUnique({
 					where: { id: Number(payload.id) },

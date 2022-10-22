@@ -10,6 +10,7 @@ function router(app){
     app.use("/order",require("./modules/order/orderContoller"))
     app.use("/shipping",require("./modules/shipping/shippingContoller"))
     app.use("/payment",require("./modules/payment/paymentContoller"))
+    app.use("/discount",require("./modules/discount/discountContoller"))
 
 }
 
