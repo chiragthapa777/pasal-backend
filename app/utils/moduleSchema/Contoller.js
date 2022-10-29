@@ -71,7 +71,7 @@ const authorize = require("../../../middlewares/authorize");
  *         name: name
  *         schema:
  *           type: string
- *         required: true
+ *         required: false
  *         example: asdjgioasdb
  *         description: The book id `sadfgasdg` or `asdgsadgas`
  *     responses:

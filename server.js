@@ -21,11 +21,11 @@ app.use(
 	})
 );
 
-app.use(async (req, res, next) => {
-	setTimeout(() => {
-		next();
-	}, 2000);
-});
+// app.use(async (req, res, next) => {
+// 	setTimeout(() => {
+// 		next();
+// 	}, 2000);
+// });
 
 //swagger
 app.use(

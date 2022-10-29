@@ -11,6 +11,7 @@ function router(app){
     app.use("/shipping",require("./modules/shipping/shippingContoller"))
     app.use("/payment",require("./modules/payment/paymentContoller"))
     app.use("/discount",require("./modules/discount/discountContoller"))
+    app.use("/tag",require("./modules/tag/tagContoller"))
 
 }
 

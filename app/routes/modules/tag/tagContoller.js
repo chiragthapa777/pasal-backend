@@ -26,20 +26,9 @@ const authorize = require("../../../middlewares/authorize");
  *               name:
  *                 type: string
  *                 example: chirag
- *               age:
- *                 type: number
- *                 example: 1
- *               active:
- *                 type: boolean
- *                 example: true
- *               orders:
- *                 type: array
- *                 items: 
- *                   type: object
- *                   properties:
- *                     orderName:
- *                       type: string
- *                       example : aoshdgoiash
+ *               desc:
+ *                 type: string
+ *                 example: This is the description of tag
  *     responses:
  *       200:
  *         content:
@@ -49,8 +38,12 @@ const authorize = require("../../../middlewares/authorize");
  *       500:
  *         description: Some server error
  */
- router.post("/",authorize([]), async (req, res) => {
+ router.post("/",authorize(["ADMIN"]), async (req, res) => {
   try {
+    const{name, desc}=req.body
+    if(!name || name===""){
+      throw "Tag/Category name much be given"
+    }
     const data =await service.create(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
@@ -68,10 +61,10 @@ const authorize = require("../../../middlewares/authorize");
  *     tags: [Tag]
  *     parameters:
  *       - in: query
- *         name: name
+ *         name: search
  *         schema:
  *           type: string
- *         required: true
+ *         required: false
  *         example: asdjgioasdb
  *         description: The book id `sadfgasdg` or `asdgsadgas`
  *     responses:
@@ -83,7 +76,7 @@ const authorize = require("../../../middlewares/authorize");
  *               items:
  *                 $ref: '#/components/schemas/Tag'
  */
-router.get("/",authorize([]), async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const data =await service.find(req,res)
     response.successResponse(res,data,200)
@@ -157,20 +150,9 @@ router.get("/:id",authorize([]), async (req, res) => {
  *               name:
  *                 type: string
  *                 example: chirag
- *               age:
- *                 type: number
- *                 example: 1
- *               active:
- *                 type: boolean
- *                 example: true
- *               orders:
- *                 type: array
- *                 items: 
- *                   type: object
- *                   properties:
- *                     orderName:
- *                       type: string
- *                       example : aoshdgoiash
+ *               desc:
+ *                 type: string
+ *                 example: This is the description of tag
  *     responses:
  *       200:
  *         content:
@@ -180,48 +162,13 @@ router.get("/:id",authorize([]), async (req, res) => {
  *       500:
  *         description: Some server error
  */
-router.put("/:id",authorize([]), async (req, res) => {
+router.put("/:id",authorize(["ADMIN"]), async (req, res) => {
   try {
     const {id}=req.params
     if(!id || isNaN(id)){
       throw "Invalid request"
     }
     const data =await service.update(req,res)
-    response.successResponse(res,data,200)
-  } catch (error) {
-    response.errorResponse(res, error, 400)
-  }
-});
-
-/**
- * @swagger
- * /tag/{id}:
- *   delete:
- *     summary: Delete Tag
- *     security:
- *       - ApiKeyAuth: []
- *     tags: [Tag]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: number
- *         required: true
- *         description: The example id
- *     responses:
- *       200:
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Tag'
- */
-router.delete("/:id",authorize([]), async (req, res) => {
-  try {
-    const {id}=req.params
-    if(!id || isNaN(id)){
-      throw "Invalid request"
-    }
-    const data =await service.delete(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
     response.errorResponse(res, error, 400)

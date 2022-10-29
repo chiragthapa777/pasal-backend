@@ -57,7 +57,7 @@ module.exports={
             if(!modelName){
                 throw "Cannot find modelName"
             }
-            const result=await prisma.modelName.findUnique({
+            const result=await prisma.modelName.update({
                 where:{
                     id:Number(id)
                 },

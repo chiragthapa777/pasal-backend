@@ -46,12 +46,20 @@ const authorize = require("../../../middlewares/authorize");
  *     tags: [Product]
  *     parameters:
  *       - in: query
- *         name: name
+ *         name: search
  *         schema:
  *           type: string
  *         required: false
- *         product: asdjgioasdb
- *         description: The book id `sadfgasdg` or `asdgsadgas`
+ *       - in: query
+ *         name: tagId
+ *         schema:
+ *           type: number
+ *         required: false
+ *       - in: query
+ *         name: vendorId
+ *         schema:
+ *           type: number
+ *         required: false
  *     responses:
  *       200:
  *         content:
