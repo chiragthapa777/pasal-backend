@@ -59,8 +59,8 @@ const service = require("./authService");
     if ( !email || !password) {
       throw "Complete information is not provided";
     }
-    const data = await service.login(req);
-
+    const data = await service.login(req,res);
+    console.log(req.headers)
     response.successResponse(res, data, 200);
   } catch (error) {
     response.errorResponse(res, error, 400);
@@ -128,7 +128,8 @@ router.post("/register/", async (req, res) => {
     ) {
       throw "password should contain atleast one number, one special character, one capital character and length should be between 8 to 20";
     }
-    const data = await service.register(req);
+    const data = await service.register(req,res);
+    console.log(req.headers)
     response.successResponse(res, data, 200);
   } catch (error) {
     response.errorResponse(res, error, 400);

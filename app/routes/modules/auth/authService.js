@@ -1,12 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const cookie = require('cookie')
 // const {prisma}=require("../../../middlewares/excludePassword")
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 module.exports = {
-  async register(req) {
+  async register(req,res) {
     const { name, email, password, number, vendorId } = req.body;
     const { slug }=req.params
     try {
@@ -46,7 +47,7 @@ module.exports = {
       throw error;
     }
   },
-  async login(req) {
+  async login(req,res) {
     try {
       const { email, password } = req.body;
       const user = await prisma.user.findFirst({
@@ -69,8 +70,17 @@ module.exports = {
         name: user.name,
       }
       const token = jwt.sign(payload,process.env.SECRET_KEY);
-      console.log(token)
       delete user.password;
+      // res.setHeader(
+      //   "Set-Cookie",
+      //   cookie.serialize("token", token, {
+      //     // httpOnly: true,
+      //     // secure: process.env.NODE_ENV !== "development",
+      //     // maxAge:  60 * 60,
+      //     // sameSite: "strict",
+      //     // path: "/",
+      //   })
+      // );
       return { token, ...user };
     } catch (error) {
       throw error;

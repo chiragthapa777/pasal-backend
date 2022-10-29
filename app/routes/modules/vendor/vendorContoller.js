@@ -47,6 +47,13 @@ const authorize = require("../../../middlewares/authorize");
  *     security:
  *       - ApiKeyAuth: []
  *     tags: [Vendor]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: number
+ *         required: false
+ *         example: 1
  *     responses:
  *       200:
  *         content:

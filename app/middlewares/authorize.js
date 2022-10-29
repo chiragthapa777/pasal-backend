@@ -5,7 +5,12 @@ const prisma = new PrismaClient();
 function authorize(roles) {
 	return (req, res, next) => {
 		try {
-			const token = req.header("token");
+			let token = req.header("token");
+			console.log("Cookies : ",req.cookies)
+			console.log("Test: ",req?.Cookie)
+			if(!token){
+				token = req.cookies.Ptoken
+			}
 			if (!token)
 				return res
 					.status(401)

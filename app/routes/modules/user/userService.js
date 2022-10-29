@@ -54,6 +54,16 @@ module.exports={
                     id:Number(id)
                 }
             })
+            if(email && user.email!==email){
+                let user= await prisma.user.findUnique({
+                    where:{
+                        email
+                    }
+                })
+                if(user){
+                    throw "Email already exists"
+                }
+            }
             if(!user){
                 throw "Cannot find the user"
             }
