@@ -6,12 +6,10 @@ function authorize(roles) {
 	return (req, res, next) => {
 		try {
 			let token = req.header("token");
-			console.log("Cookies : ",req.cookies)
-			console.log("Test: ",req?.Cookie)
-			if(!token){
-				token = req.cookies.Ptoken
+			if (!token) {
+				token = req.cookies.Ptoken;
 			}
-			if (!token)
+			if (!token && !roles.includes("VISITOR"))
 				return res
 					.status(401)
 					.json({ success: false, data: "Login first !!!" });
@@ -25,25 +23,28 @@ function authorize(roles) {
 					if (
 						roles.length > 0 &&
 						user.role !== "ADMIN" &&
-						!roles.find((r) => r === user.role)
+						!roles.find((r) => r === user.role) &&
+						!roles.includes("VISITOR")
 					) {
-						return res
-							.status(401)
-							.json({
-								success: false,
-								data: "Not authorized !!!",
-							});
+						return res.status(401).json({
+							success: false,
+							data: "Not authorized !!!",
+						});
 					}
+					console.log(`Serving request for user: ${user?.name}(${user?.role}) ${user?.vendorId&&`vendorId : ${user.vendorId}`}`)
 					req.user = user;
-					next();
+					return next();
 				})
 				.catch((error) => {
 					console.log(error);
+					if(roles.includes("VISITOR")){return next()}
 					return res
 						.status(400)
 						.json({ success: false, data: "Cannot Find the user" });
 				});
 		} catch (error) {
+			console.log(error.message)
+			if(roles.includes("VISITOR")){return next()}
 			res.status(400).json({ success: false, data: "Invalid Token" });
 		}
 	};

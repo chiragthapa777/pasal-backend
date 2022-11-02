@@ -8,34 +8,114 @@ const { deleteImage } = require("../uploads/uploadService");
 
 const roundOffFunction = (avg) => {
 	const difference = avg - Math.floor(avg);
-	if (difference > 0.5) {
+	if(difference === 0){
+		return avg
+	}else if (difference > 0.5) {
 		return Math.floor(avg) + 0.5;
 	} else {
 		return Math.floor(avg) + 1;
 	}
 };
+/**
+ * 
+ * @param {[string]} tags 
+ * @param {number} productId 
+ * @param {prisma} prisma 
+ */
+const addTagsToProduct=async (tags,productId,prisma)=>{
+	await prisma.product_Tag.deleteMany({
+		where:{
+			productId
+		}
+	})
+	for(const tag of tags){
+		const checkTag = await prisma.tag.findUnique({
+			where:{
+				name:tag
+			}
+		})
+		if(!checkTag){
+			throw `Cannot find tag with name ${tag}`
+		}
+		await prisma.product_Tag.create({
+			data:{
+				productId,
+				tagId:checkTag.id
+			}
+		})
+	}
+}
+/**
+ * 
+ * @param {[{url:string,public_url:string,desc:string}]} images 
+ * @param {product} product
+ * @param {prisma} prisma 
+ */
+const addImagesToProduct=async (images,product,prisma)=>{
+	for(const image of images){
+		await prisma.productImage.create({
+			data:{
+				public_url:image.public_url,
+				url:image.url,
+				desc:image?.desc || product.name,
+				productId:product.id
+			}
+		})
+	}
+}
 
 module.exports = {
 	async create(req) {
 		try {
 			const data = { ...req.body };
-			console.log(req.user);
+			const tags = data?.tags || []
+			if(data?.tags || tags.length>0){
+				delete data.tags
+				if(tags.length>5) throw "A product can have atmost 5 tags"
+			}
+			const images = data?.images || []
+			if(data?.images || images.length>0){
+				delete data.images
+			}
 			if (!req.user.vendorId) {
-				throw "You cannot create product";
+				throw "You cannot create product, become seller first.";
 			}
 			data.userId = Number(req.user.id);
 			data.vendorId = Number(req.user.vendorId);
-			return await prisma.product.create({
-				data,
-				include: includeObj,
-			});
+			let result = {}
+			return await prisma.$transaction(async(tx)=>{
+				//create product
+				let refetchData = false
+				const product = await tx.product.create({
+					data,
+					include: includeObj,
+				});
+				result = product
+				if(tags.length>0){
+					await addTagsToProduct(tags,product.id,tx)
+					refetchData = true
+				}
+				if(images.length>0){
+					await addImagesToProduct(images,product,tx)
+					refetchData = true
+				}
+				if(refetchData){
+					result = await tx.product.findUnique({
+						where:{
+							id:product.id
+						},
+						include:includeObj,
+					})
+				}
+				return result
+			})
 		} catch (error) {
 			throw error;
 		}
 	},
 	async find(req) {
 		try {
-			const { search, vendorId, tagId } = req.query;
+			const { search, vendor, tag } = req.query;
 			let whereObj = {};
 			if (search) {
 				whereObj.OR = [
@@ -53,20 +133,22 @@ module.exports = {
 					},
 				];
 			}
-            if(tagId){
+            if(tag){
                 whereObj={
                     productTags:{
                         some:{
                             tag:{
-                                id:Number(tagId)
+                                name:tag
                             }
                         }
                     }
                 }
             }
-            if(vendorId){
+            if(vendor){
                 whereObj={
-                    vendorId:Number(vendorId)
+                    vendor:{
+						name:vendor
+					}
                 }
             }
 			let orderByObj = {};
@@ -81,12 +163,12 @@ module.exports = {
 				const length = products[p]?.reviews?.length
 					? products[p].reviews.length !== 0
 						? products[p].reviews.length
-						: 1
-					: 1;
+						: 0
+					: 0;
 				for (let review of products[p]?.reviews) {
 					total += review.rating;
 				}
-				averageRating = total / length;
+				averageRating = length!==0 ? total / length : 0;
 				products[p] = {
 					...products[p],
 					averageRating: roundOffFunction(averageRating),
@@ -112,12 +194,12 @@ module.exports = {
 			const length = product?.reviews?.length
 				? product.reviews.length !== 0
 					? product.reviews.length
-					: 1
-				: 1;
+					: 0
+				: 0;
 			for (let review of product?.reviews) {
 				total += review.rating;
 			}
-			averageRating = total / length;
+			averageRating = length!==0 ? total / length : 0;
 			return {
 				...product,
 				averageRating: roundOffFunction(averageRating),
@@ -130,6 +212,15 @@ module.exports = {
 		try {
 			console.log(req.params, req.body);
 			const data = { ...req.body };
+			const tags = data?.tags || [];
+			if (data?.tags || tags.length > 0) {
+				delete data.tags;
+				if (tags.length > 5) throw "A product can have atmost 5 tags";
+			}
+			const images = data?.images || [];
+			if (data?.images || images.length > 0) {
+				delete data.images;
+			}
 			let product = await prisma.product.findUnique({
 				where: {
 					id: Number(req.params.id),
@@ -138,13 +229,21 @@ module.exports = {
 			if (!product) {
 				throw "Cannot find the product";
 			}
-			return await prisma.product.update({
+			let result = {};
+			if(tags.length>0){
+				await addTagsToProduct(tags,product.id,prisma)
+			}
+			if(images.length>0){
+				await addImagesToProduct(images,product,prisma)
+			}
+			result = await prisma.product.update({
 				where: {
 					id: Number(req.params.id),
 				},
 				data,
 				include: includeObj,
 			});
+			return result;
 		} catch (error) {
 			console.log(error);
 			throw error;
@@ -184,6 +283,7 @@ module.exports = {
 			if (!product) {
 				throw "cannot find product";
 			}
+			
 			const productImage = await prisma.productImage.create({
 				data: {
 					productId: Number(productId),

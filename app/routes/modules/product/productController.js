@@ -51,14 +51,14 @@ const authorize = require("../../../middlewares/authorize");
  *           type: string
  *         required: false
  *       - in: query
- *         name: tagId
+ *         name: tag
  *         schema:
- *           type: number
+ *           type: string
  *         required: false
  *       - in: query
- *         name: vendorId
+ *         name: vendor
  *         schema:
- *           type: number
+ *           type: string
  *         required: false
  *     responses:
  *       200:
@@ -69,8 +69,9 @@ const authorize = require("../../../middlewares/authorize");
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-router.get("/", authorize([]),async (req, res) => {
+router.get("/",authorize(["VISITOR"]),async (req, res) => {
   try {
+    console.log(req.query)
     const data =await service.find(req)
     response.successResponse(res,data,200)
   } catch (error) {
@@ -107,7 +108,7 @@ router.get("/", authorize([]),async (req, res) => {
  *       404:
  *         description: The book was not found
  */
-router.get("/:id",authorize([]), async (req, res) => {
+router.get("/:id",authorize(["VISITOR"]), async (req, res) => {
   try {
     const data =await service.findById(req)
     response.successResponse(res,data,200)
@@ -149,6 +150,26 @@ router.get("/:id",authorize([]), async (req, res) => {
  *               quantity:
  *                 type: number
  *                 example: 10
+ *               images:
+ *                 type: array
+ *                 items: 
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       example: dasgas
+ *                     public_url:
+ *                       type: string
+ *                       example: sadgsd
+ *                     desc:
+ *                       type: string
+ *                       example: this is desc for image
+ *               tags:
+ *                 type: array
+ *                 items: 
+ *                   type: string
+ *                   exmaple : ["Men's Fashion"]
+ * 
  *     responses:
  *       200:
  *         content:
@@ -158,7 +179,7 @@ router.get("/:id",authorize([]), async (req, res) => {
  *       500:
  *         description: Some server error
  */
-router.post("/",authorize([]), async (req, res) => {
+router.post("/",authorize(["VENDOR"]), async (req, res) => {
 try {
   const data =await service.create(req)
   response.successResponse(res,data,200)
@@ -207,6 +228,25 @@ try {
  *               quantity:
  *                 type: number
  *                 example: 10
+ *               images:
+ *                 type: array
+ *                 items: 
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       example: dasgas
+ *                     public_url:
+ *                       type: string
+ *                       example: sadgsd
+ *                     desc:
+ *                       type: string
+ *                       example: this is desc for image
+ *               tags:
+ *                 type: array
+ *                 items: 
+ *                   type: string
+ *                   exmaple : ["Men's Fashion"]
  *     responses:
  *       200:
  *         content:

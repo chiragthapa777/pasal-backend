@@ -12,13 +12,16 @@ module.exports={
     async create(req,res){
         try {
             let data=req.body
-            const tag = await prisma.tag.findUnique({
+            const tag = await prisma.tag.findFirst({
                 where:{
-                    name:data.name
+                    name:{
+                        equals:data.name,
+                        mode: "insensitive"
+                    }
                 }
             })
             if(tag){
-                throw "Tag with that name already exists"
+                throw "Tag with that name "+data.name+" already exists"
             }
             const result = await prisma.tag.create({
                 data,

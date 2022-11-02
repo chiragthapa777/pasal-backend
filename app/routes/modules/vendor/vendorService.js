@@ -65,6 +65,22 @@ module.exports = {
 	async find(req, res) {
 		try {
 			const whereObj = {};
+			if(req.query.search){
+				whereObj.OR = [
+					{
+						name: {
+							contains: req.query.search,
+							mode: "insensitive",
+						},
+					},
+					{
+						desc: {
+							contains: req.query.search,
+							mode: "insensitive",
+						},
+					},
+				];
+			}
 			if (req.query.userId && !isNaN(req.query.userId)) {
 				whereObj.users = {
 					some: {

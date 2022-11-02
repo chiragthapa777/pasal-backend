@@ -49,9 +49,9 @@ const authorize = require("../../../middlewares/authorize");
  *     tags: [Vendor]
  *     parameters:
  *       - in: query
- *         name: userId
+ *         name: search
  *         schema:
- *           type: number
+ *           type: string
  *         required: false
  *         example: 1
  *     responses:
@@ -63,7 +63,7 @@ const authorize = require("../../../middlewares/authorize");
  *               items:
  *                 $ref: '#/components/schemas/Vendor'
  */
-router.get("/", authorize([]), async (req, res) => {
+router.get("/", authorize(["VISITOR"]), async (req, res) => {
 	try {
 		const data = await service.find(req, res);
 		response.successResponse(res, data, 200);

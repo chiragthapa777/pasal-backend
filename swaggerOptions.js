@@ -70,7 +70,7 @@ const swaggerOptions = {
     customCss: '.swagger-ui .topbar { display: none } ',
     customSiteTitle: "Pasal API Documentation",
     // customfavIcon: "../images/favicon_red.ico",
-    swaggerOptions: {docExpansion: "none",persistAuthorization: true},
+    swaggerOptions: {docExpansion: "none",persistAuthorization: false},
 }
 
 module.exports = {
