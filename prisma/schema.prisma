@@ -335,6 +335,7 @@ model Payment {
   updatedAt DateTime @updatedAt
   amount Float
   remark String?
+  note   String?
   mode PaymentMode
   addedBy Int
   orderId Int

@@ -79,12 +79,15 @@ module.exports={
                 throw "Cannot find tag"
             }
             if(req.body?.name){
-                const check = await prisma.tag.findUnique({
+                const check = await prisma.tag.findMany({
                     where:{
-                        name:req.body.name
+                        name:req.body.name,
+                        id:{
+                            not : tag.id
+                        }
                     }
                 })
-                if(check && check.id!==tag){
+                if(check.length>0 ){
                     throw `Tag with name '${req.body.name}' already exists`
                 }
             }

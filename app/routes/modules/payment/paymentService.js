@@ -7,7 +7,7 @@ const includeObj={}
 module.exports={
     async create(req,res){
         try {
-            const {amount, orderId, mode, remark}=req.body
+            const {amount, orderId, mode, note}=req.body
             let returnAmount = 0
             const payments=[]
             const order = await prisma.order.findUnique({
@@ -31,20 +31,21 @@ module.exports={
                 remark:`Bill paid for order id : ${order.id} through ${mode}`,
                 addedBy:req.user.id,
                 mode,
-                orderId:order.id
+                orderId:order.id,
+                note: note || ''
             })
             if(amount > billedAmount-paidAmount){
+                returnAmount = (billedAmount-paidAmount)-amount
                 payments.push({
-                    amount:(billedAmount-paidAmount)-amount,
+                    amount:returnAmount,
                     remark:`CHANGE`,
                     addedBy:req.user.id,
                     mode,
                     orderId:order.id
                 })
-                returnAmount = (billedAmount-paidAmount)-amount
             }
+            let isPaid = order.isPaid
             await prisma.$transaction(async tx=>{
-                console.log(billedAmount,"=====", paidAmount + payments.reduce((acc,next)=>acc + next.amount,0))
                 if(paidAmount + payments.reduce((acc,next)=>acc + next.amount,0)>=billedAmount){
                     await tx.order.update({
                         where:{
@@ -54,12 +55,13 @@ module.exports={
                             isPaid:true
                         }
                     })
+                    isPaid = true
                 }
                 await tx.payment.createMany({
                     data:payments
                 })
             })
-            return {returnAmount}
+            return {returnAmount,isPaid}
         } catch (error) {
             throw error
         }
@@ -72,7 +74,10 @@ module.exports={
                 whereObj.orderId=Number(orderId)
             }
             const result = await prisma.payment.findMany({
-                where:whereObj
+                where:whereObj,
+                include:{
+                    user:true
+                }
             })
             return result
         } catch (error) {

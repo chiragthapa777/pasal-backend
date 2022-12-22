@@ -45,6 +45,54 @@ module.exports={
             throw error
         }
     },
+    async getLogginedUserInfo(req){
+        try {
+            const {user:{id}} = req
+            return await prisma.user.findUnique({
+                where:{
+                    id
+                },
+                select:{
+                    name:true,
+                    email:true,
+                    id:true,
+                    number:true,
+                    shipping:true,
+                    vendorId:true,
+                    role:true,
+                    cart:{
+                        include:{
+                            cartDetails:{
+                                where:{
+                                    active:true
+                                },
+                                include:{
+                                    product:{
+                                        include:{
+                                            images:true,
+                                            discounts:{
+                                                where:{
+                                                    isValid:true
+                                                }
+                                            },
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                // select:{
+                //     id:true,
+                //     name:true,
+                //     email:true
+                // }
+            })
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    },
     async editUser(req){
         try {
             const { id }=req.params

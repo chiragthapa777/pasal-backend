@@ -115,7 +115,7 @@ module.exports = {
 	},
 	async find(req) {
 		try {
-			const { search, vendor, tag } = req.query;
+			const { search, vendor, tag , vendorId} = req.query;
 			let whereObj = {};
 			if (search) {
 				whereObj.OR = [
@@ -148,6 +148,13 @@ module.exports = {
                 whereObj={
                     vendor:{
 						name:vendor
+					}
+                }
+            }
+            if(vendorId){
+                whereObj={
+                    vendor:{
+						id:Number(vendorId)
 					}
                 }
             }

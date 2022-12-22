@@ -103,7 +103,8 @@ router.get("/",authorize([]), async (req, res) => {
  */
  router.get("/loggedin",authorize([]), async (req, res) => {
   try {
-    response.successResponse(res, req.user, 200);
+    const data = await service.getLogginedUserInfo(req)
+    response.successResponse(res, data, 200);
   } catch (error) {
     response.errorResponse(res, error, 400);
   }

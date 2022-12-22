@@ -1,3 +1,5 @@
 wish list crud
 tag crud
 update product tag
+
+Consolas, 'Courier New', monospace

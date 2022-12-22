@@ -6,11 +6,25 @@ const prisma = new PrismaClient();
 const includeObj = {
 	orderItems: {
 		include: {
-			product: true,
+			product: {
+				include:{
+					vendor:true
+				}
+			},
 			othercharges: true,
 		},
 	},
+	user:{
+		include:{
+			shipping:true
+		}
+	},
+	payments:true
 };
+
+const itemsIncludeobj ={
+	product:true
+}
 
 /**
  *
@@ -362,10 +376,13 @@ module.exports = {
 				};
 			}
 			if (vendorId) {
-				whereObj.vendorId = Number(vendorId);
+				whereObj.product ={
+					vendorId:Number(vendorId)
+				} ;
 			}
 			const result = await prisma.orderItems.findMany({
 				where: whereObj,
+				include:itemsIncludeobj
 			});
 			return result;
 		} catch (error) {
@@ -393,6 +410,7 @@ module.exports = {
 				where: {
 					id: Number(id),
 				},
+				include:itemsIncludeobj
 			});
 			return order;
 		} catch (error) {
@@ -423,7 +441,7 @@ module.exports = {
 							status,
 						},
 					});
-					return await tx.order.findUnique({
+					return await tx.order.update({
 						where: {
 							id: Number(id),
 						},
@@ -444,21 +462,21 @@ module.exports = {
 					if (status !== "WAREHOUSED") {
 						throw "First the order and its all item should be `WAREHOUSED`";
 					}
-					result = await updateFunction(status, tx);
+					result = await updateFunction(status);
 					break;
 				}
 				case "WAREHOUSED": {
 					if (status !== "DELIVERING") {
 						throw "First the order should be `DELIVERING`";
 					}
-					result = await updateFunction(status, tx);
+					result = await updateFunction(status);
 					break;
 				}
 				case "DELIVERING": {
 					if (status !== "COMPLETED") {
 						throw "`COMPLETED` is only the option";
 					}
-					result = await updateFunction(status, tx);
+					result = await updateFunction(status);
 					break;
 				}
 				default: {
@@ -470,7 +488,7 @@ module.exports = {
 			throw error;
 		}
 	},
-	async update(req, res) {
+	async updateOrderItem(req, res) {
 		try {
 			const { id } = req.params;
 			const { status } = req.body;
@@ -478,19 +496,23 @@ module.exports = {
 				where: {
 					id: Number(id),
 				},
-				include: includeObj,
+				include: itemsIncludeobj,
 			});
 			if (!item) {
 				throw "Cannot find order";
 			}
-			if (item.status !== "PLACED") {
-				throw "You are not authorized";
+			// if (item.status !== "PLACED") {
+			// 	throw "You are not authorized";
+			// }
+			if(item.status !== "PROCESSING" && status==="PLACED"){
+				throw "You cannot revert after item's are warehoused"
 			}
 			await prisma.$transaction(async (tx) => {	
 				item = await tx.orderItems.update({
 					where: {
 						id:item.id
 					},
+					include:itemsIncludeobj,
 					data: {
 						status,
 					},
@@ -501,8 +523,8 @@ module.exports = {
                     }
                 })
                 let updateOrder=true
-                for(const item of otherItems){
-                    if(item.status!=="PROCESSING"){
+                for(const i of otherItems){
+                    if(!i.otherChargeId && i.status!=="PROCESSING" && i.id !== item.id){
                         updateOrder=false
                         break
                     }

@@ -60,6 +60,11 @@ const authorize = require("../../../middlewares/authorize");
  *         schema:
  *           type: string
  *         required: false
+ *       - in: query
+ *         name: vendorId
+ *         schema:
+ *           type: number
+ *         required: false
  *     responses:
  *       200:
  *         content:
@@ -256,8 +261,9 @@ try {
  *       500:
  *         description: Some server error
  */
-router.put("/:id",authorize([]), async (req, res) => {
+router.put("/:id",authorize(["VENDOR"]), async (req, res) => {
   try {
+    console.log(res.body)
     const data =await service.update(req)
     response.successResponse(res,data,200)
   } catch (error) {
@@ -289,7 +295,7 @@ router.put("/:id",authorize([]), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.delete("/image/:id",authorize([]), async (req, res) => {
+router.delete("/image/:id",authorize(["VENDOR"]), async (req, res) => {
   try {
     const data =await service.deleteImage(req)
     response.successResponse(res,data,200)
@@ -321,7 +327,7 @@ router.delete("/image/:id",authorize([]), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.delete("/:id",authorize([]), async (req, res) => {
+router.delete("/:id",authorize(["VENDOR"]), async (req, res) => {
   try {
     const data =await service.delete(req)
     response.successResponse(res,data,200)
@@ -367,7 +373,7 @@ router.delete("/:id",authorize([]), async (req, res) => {
  *       500:
  *         description: Some server error
  */
- router.post("/addImage",authorize([]), async (req, res) => {
+ router.post("/addImage",authorize(["VENDOR"]), async (req, res) => {
   try {
     const data =await service.addImage(req)
     response.successResponse(res,data,200)

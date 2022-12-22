@@ -31,10 +31,15 @@ module.exports={
     },
     async find(req,res){
         try {
-            const {productId}=req.query
+            const {productId, vendorId}=req.query
             let whereObj={}
             if(productId || !isNaN(productId)){
                 whereObj.productId=Number(productId)
+            }
+            if(vendorId || !isNaN(vendorId)){
+                whereObj.product={
+                    vendorId:Number(vendorId)
+                }
             }
             const result = await prisma.question.findMany({
                 where:whereObj,

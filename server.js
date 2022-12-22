@@ -21,11 +21,11 @@ app.use(
 	})
 );
 
-// app.use(async (req, res, next) => {
-// 	setTimeout(() => {
-// 		next();
-// 	}, 3000);
-// });
+app.use(async (req, res, next) => {
+	setTimeout(() => {
+		next();
+	}, 1500);
+});
 
 //swagger
 app.use(
@@ -37,11 +37,6 @@ app.get("/api-docs.json", (req, res) => {
 	res.setHeader("Content-Type", "application/json");
 	res.send(swaggerDocs);
 });
-
-// //this is middleware for receving file from client
-// app.use(fileUpload({
-//   useTempFiles:true
-// }))
 
 //prisma
 app.use(prismaMiddleware);

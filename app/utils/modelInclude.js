@@ -22,7 +22,8 @@ const questionReviewObject={
         },
         user:{
             select:userSelectObject
-        }
+        },
+        product:true
     }
 
 

@@ -39,6 +39,8 @@ const { PAYMENT_MODE } = require("../../../utils/constants");
  *               amount:
  *                 type: number
  *                 example: 1
+ *               note:
+ *                 type: string
  *               mode:
  *                 type: string
  *                 example: CASH

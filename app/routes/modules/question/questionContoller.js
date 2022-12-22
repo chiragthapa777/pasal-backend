@@ -66,6 +66,12 @@ const authorize = require("../../../middlewares/authorize");
  *           type: number
  *         required: false
  *         example: 1
+ *       - in: query
+ *         name: vendorId
+ *         schema:
+ *           type: number
+ *         required: false
+ *         example: 1
  *     responses:
  *       200:
  *         content:

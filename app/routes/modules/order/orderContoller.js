@@ -414,15 +414,16 @@ router.put("/:id",authorize(["ADMIN"]), async (req, res) => {
 router.put("/:id/items",authorize(["VENDOR"]), async (req, res) => {
   try {
     const {id}=req.params
+    console.log(req.body)
     const {status}=req.body
-    const OrderStatusEnumForVendor =["PROCESSING"]
+    const OrderStatusEnumForVendor =["PROCESSING","PLACED"]
     if(!OrderStatusEnumForVendor.includes(status)){
       throw "Invalid status provided"
     }
     if(!id || isNaN(id)){
       throw "Invalid request"
     }
-    const data =await service.update(req,res)
+    const data =await service.updateOrderItem(req,res)
     response.successResponse(res,data,200)
   } catch (error) {
     response.errorResponse(res, error, 400)
