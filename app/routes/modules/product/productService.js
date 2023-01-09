@@ -17,10 +17,10 @@ const roundOffFunction = (avg) => {
 	}
 };
 /**
- * 
- * @param {[string]} tags 
- * @param {number} productId 
- * @param {prisma} prisma 
+ *
+ * @param {[string]} tags
+ * @param {number} productId
+ * @param {prisma} prisma
  */
 const addTagsToProduct=async (tags,productId,prisma)=>{
 	await prisma.product_Tag.deleteMany({
@@ -46,10 +46,10 @@ const addTagsToProduct=async (tags,productId,prisma)=>{
 	}
 }
 /**
- * 
- * @param {[{url:string,public_url:string,desc:string}]} images 
+ *
+ * @param {[{url:string,public_url:string,desc:string}]} images
  * @param {product} product
- * @param {prisma} prisma 
+ * @param {prisma} prisma
  */
 const addImagesToProduct=async (images,product,prisma)=>{
 	for(const image of images){
@@ -197,15 +197,21 @@ module.exports = {
 				where: whereObj,
 				include: includeObj,
 			});
+			if(!product){
+				throw "Cannot find the product"
+			}
 			let total = 0;
 			const length = product?.reviews?.length
 				? product.reviews.length !== 0
 					? product.reviews.length
 					: 0
 				: 0;
-			for (let review of product?.reviews) {
-				total += review.rating;
+			if(product?.reviews){
+				for (let review of product?.reviews) {
+					total += review.rating;
+				}
 			}
+
 			averageRating = length!==0 ? total / length : 0;
 			return {
 				...product,
@@ -290,7 +296,7 @@ module.exports = {
 			if (!product) {
 				throw "cannot find product";
 			}
-			
+
 			const productImage = await prisma.productImage.create({
 				data: {
 					productId: Number(productId),
